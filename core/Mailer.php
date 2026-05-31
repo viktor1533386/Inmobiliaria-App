@@ -39,8 +39,8 @@ class Mailer {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 segundos
-        // Obtener la API key de las variables de entorno de Railway
-        $apiKey = getenv('BREVO_API_KEY') ?: '';
+        // Obtener la API key de las variables de entorno de Railway (múltiples métodos por seguridad)
+        $apiKey = $_ENV['BREVO_API_KEY'] ?? $_SERVER['BREVO_API_KEY'] ?? getenv('BREVO_API_KEY') ?: '';
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'accept: application/json',
