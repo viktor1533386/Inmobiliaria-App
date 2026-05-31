@@ -43,15 +43,15 @@ class AuthController extends Controller {
                 } else {
                     // Intentar buscar como Vendedor
                     $vend = $this->vendedor->findByEmail($email);
-                    if ($vend && password_verify($password, $vend['password'])) {
+                    if ($vend && password_verify($password, $vend->password)) {
                         // Login exitoso Vendedor
                         session_regenerate_id(true);
-                        $_SESSION['usuario_id']     = $vend['id'];
-                        $_SESSION['usuario_nombre'] = $vend['nombre'] . ' ' . $vend['apellido'];
-                        $_SESSION['usuario_email']  = $vend['email'];
+                        $_SESSION['usuario_id']     = $vend->id;
+                        $_SESSION['usuario_nombre'] = $vend->nombre . ' ' . $vend->apellido;
+                        $_SESSION['usuario_email']  = $vend->email;
                         $_SESSION['usuario_rol']    = 'vendedor';
                         
-                        if ($vend['requiere_cambio_pass']) {
+                        if ($vend->requiere_cambio_pass) {
                             $this->redirect('auth/cambiar_password');
                         } else {
                             $this->redirect('admin/dashboard');
