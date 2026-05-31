@@ -9,5 +9,5 @@ WORKDIR /app
 # Copiar el código de la aplicación
 COPY . /app
 
-# Comando de inicio usando nuestro router seguro
-CMD php -S 0.0.0.0:$PORT router.php
+# Comando de inicio usando nuestro router seguro y apuntando a public
+CMD php -S 0.0.0.0:$PORT -t public router.php
