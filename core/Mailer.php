@@ -17,7 +17,7 @@ class Mailer {
     private static string $username = 'viktor16412@gmail.com'; // Correo que envía
     private static string $password = 'sjbd xaqh khsx cwpe';     // Contraseña de aplicación
     private static string $fromName = 'Hogar Ideal Perú';
-    private static int $port = 465;
+    private static int $port = 587;
 
     /**
      * Enviar un correo electrónico básico.
@@ -37,8 +37,9 @@ class Mailer {
             $mail->SMTPAuth   = true;
             $mail->Username   = self::$username;
             $mail->Password   = self::$password;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
             $mail->Port       = self::$port;
+            $mail->Timeout    = 10; // Timeout de 10 segundos
             $mail->CharSet    = 'UTF-8';
 
             // Remitente y destinatario
