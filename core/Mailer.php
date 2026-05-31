@@ -1,26 +1,16 @@
 <?php
 // ============================================================
-//  CORE: Mailer – Envío de correos usando PHPMailer
+//  CORE: Mailer – Envío de correos usando API HTTP de Brevo
+//  (Bypass de restricciones SMTP de Railway)
 // ============================================================
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require_once APP_ROOT . '/core/phpmailer/Exception.php';
-require_once APP_ROOT . '/core/phpmailer/PHPMailer.php';
-require_once APP_ROOT . '/core/phpmailer/SMTP.php';
 
 class Mailer {
 
-    // Configuración SMTP estática para este proyecto
-    private static string $host = 'smtp.gmail.com';
-    private static string $username = 'viktor16412@gmail.com'; // Correo que envía
-    private static string $password = 'sjbd xaqh khsx cwpe';     // Contraseña de aplicación
-    private static string $fromName = 'Hogar Ideal Perú';
-    private static int $port = 587;
+    private static string $senderEmail = 'viktor16412@gmail.com';
+    private static string $senderName = 'Hogar Ideal Perú';
 
     /**
-     * Enviar un correo electrónico básico.
+     * Enviar un correo electrónico a través del puerto 443 usando cURL.
      *
      * @param string $to Email del destinatario
      * @param string $subject Asunto del correo
@@ -28,36 +18,46 @@ class Mailer {
      * @return bool True si se envió, false si falló
      */
     public static function send(string $to, string $subject, string $body): bool {
-        $mail = new PHPMailer(true);
+        
+        $url = 'https://api.brevo.com/v3/smtp/email';
+        
+        $data = [
+            'sender' => [
+                'name'  => self::$senderName,
+                'email' => self::$senderEmail
+            ],
+            'to' => [
+                ['email' => $to]
+            ],
+            'subject'     => $subject,
+            'htmlContent' => $body
+        ];
 
-        try {
-            // Configuración del servidor
-            $mail->isSMTP();
-            $mail->Host       = self::$host;
-            $mail->SMTPAuth   = true;
-            $mail->Username   = self::$username;
-            $mail->Password   = self::$password;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
-            $mail->Port       = self::$port;
-            $mail->Timeout    = 10; // Timeout de 10 segundos
-            $mail->CharSet    = 'UTF-8';
+        $ch = curl_init($url);
+        
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Timeout de 10 segundos
+        // Obtener la API key de las variables de entorno de Railway
+        $apiKey = getenv('BREVO_API_KEY') ?: '';
 
-            // Remitente y destinatario
-            $mail->setFrom(self::$username, self::$fromName);
-            $mail->addAddress($to);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'accept: application/json',
+            'api-key: ' . $apiKey,
+            'content-type: application/json'
+        ]);
 
-            // Contenido
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $body;
-            $mail->AltBody = strip_tags($body);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-            $mail->send();
+        // Brevo devuelve HTTP 201 Created cuando el correo se encola con éxito
+        if ($httpCode === 201 || $httpCode === 200) {
             return true;
-        } catch (Exception $e) {
-            // Logear error si es necesario
-            error_log("No se pudo enviar el correo a $to. Error: {$mail->ErrorInfo}");
-            return false;
         }
+
+        error_log("Brevo API Error ($httpCode): " . $response);
+        return false;
     }
 }
