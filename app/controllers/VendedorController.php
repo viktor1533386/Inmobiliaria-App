@@ -4,6 +4,7 @@
 // ============================================================
 require_once APP_ROOT . '/core/Controller.php';
 require_once APP_ROOT . '/core/Middleware.php';
+require_once APP_ROOT . '/core/Mailer.php';
 require_once APP_ROOT . '/app/models/Vendedor.php';
 
 class VendedorController extends Controller {
@@ -54,10 +55,28 @@ class VendedorController extends Controller {
 
                 $this->vendedor->insert($datos);
                 
-                // Simular envío de correo
-                // mail($datos['email'], 'Tus credenciales de acceso', "Tu contraseña temporal es: $randomPass");
+                // Enviar correo real usando PHPMailer
+                $asunto = "Bienvenido a Hogar Ideal Perú - Tus Credenciales";
+                $cuerpo = "
+                    <h2>¡Hola {$datos['nombre']}!</h2>
+                    <p>Has sido registrado como agente inmobiliario en <strong>Hogar Ideal Perú</strong>.</p>
+                    <p>Tus credenciales temporales de acceso son:</p>
+                    <ul>
+                        <li><strong>Email:</strong> {$datos['email']}</li>
+                        <li><strong>Contraseña:</strong> $randomPass</li>
+                    </ul>
+                    <p>Por seguridad, el sistema te pedirá cambiar esta contraseña la primera vez que ingreses al panel.</p>
+                    <p>Puedes iniciar sesión aquí: <a href='" . BASE_URL . "/auth/login'>" . BASE_URL . "/auth/login</a></p>
+                ";
                 
-                $this->flash('success', "Vendedor registrado. Se envió un correo con la clave temporal: $randomPass");
+                $enviado = Mailer::send($datos['email'], $asunto, $cuerpo);
+                
+                if ($enviado) {
+                    $this->flash('success', "Vendedor registrado. Se envió el correo con credenciales a {$datos['email']}.");
+                } else {
+                    $this->flash('success', "Vendedor registrado, pero ocurrió un error al enviar el correo. Contraseña temporal: $randomPass");
+                }
+                
                 $this->redirect('vendedor');
             }
         }
