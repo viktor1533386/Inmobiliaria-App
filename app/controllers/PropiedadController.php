@@ -50,7 +50,14 @@ class PropiedadController extends Controller {
     // GET /propiedad/admin  → lista admin
     public function admin(): void {
         Middleware::auth();
-        $propiedades = $this->propiedad->findAll();
+        
+        if (($_SESSION['usuario_rol'] ?? '') === 'vendedor') {
+            // Un vendedor solo ve sus propiedades
+            $propiedades = $this->propiedad->query("SELECT * FROM propiedades WHERE vendedor_id = ?", [$_SESSION['usuario_id']]);
+        } else {
+            $propiedades = $this->propiedad->findAll();
+        }
+        
         $this->render('propiedades/admin_index', [
             'titulo'      => 'Gestión de Propiedades',
             'propiedades' => $propiedades,
@@ -78,6 +85,11 @@ class PropiedadController extends Controller {
                 }
 
                 if (empty($errores)) {
+                    // Si es vendedor, forzar que sea el dueño de la propiedad
+                    if (($_SESSION['usuario_rol'] ?? '') === 'vendedor') {
+                        $datos['vendedor_id'] = $_SESSION['usuario_id'];
+                    }
+
                     $this->propiedad->insert($datos);
                     $this->flash('success', 'Propiedad creada correctamente.');
                     $this->redirect('propiedad/admin');
@@ -98,6 +110,11 @@ class PropiedadController extends Controller {
         Middleware::auth();
         $propiedad = $this->propiedad->findById((int)$id);
         if (!$propiedad) $this->redirect('propiedad/admin');
+
+        if (($_SESSION['usuario_rol'] ?? '') === 'vendedor' && $propiedad->vendedor_id != $_SESSION['usuario_id']) {
+            $this->flash('error', 'No tienes permiso para editar esta propiedad.');
+            $this->redirect('propiedad/admin');
+        }
 
         $errores = [];
 
@@ -120,6 +137,10 @@ class PropiedadController extends Controller {
                 }
 
                 if (empty($errores)) {
+                    if (($_SESSION['usuario_rol'] ?? '') === 'vendedor') {
+                        $datos['vendedor_id'] = $_SESSION['usuario_id']; // Forzar el ID original
+                    }
+
                     $this->propiedad->update((int)$id, $datos);
                     $this->flash('success', 'Propiedad actualizada correctamente.');
                     $this->redirect('propiedad/admin');
@@ -140,7 +161,14 @@ class PropiedadController extends Controller {
     public function eliminar(string $id = '0'): void {
         Middleware::auth();
         $propiedad = $this->propiedad->findById((int)$id);
+        
         if ($propiedad) {
+            if (($_SESSION['usuario_rol'] ?? '') === 'vendedor' && $propiedad->vendedor_id != $_SESSION['usuario_id']) {
+                $this->flash('error', 'No tienes permiso para eliminar esta propiedad.');
+                $this->redirect('propiedad/admin');
+                return;
+            }
+
             if ($propiedad->imagen !== 'no-imagen.jpg') {
                 @unlink(UPLOAD_DIR . $propiedad->imagen);
             }

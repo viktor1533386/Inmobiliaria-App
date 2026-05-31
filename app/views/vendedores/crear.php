@@ -34,6 +34,21 @@
         <input type="text" name="telefono" placeholder="+51 936 338 196"
                value="<?= htmlspecialchars($_POST['telefono'] ?? '') ?>">
       </div>
+      <div class="form-group">
+        <label>DNI</label>
+        <input type="text" name="dni" placeholder="12345678"
+               value="<?= htmlspecialchars($_POST['dni'] ?? '') ?>">
+      </div>
+      <div class="form-group">
+        <label>Especialidad</label>
+        <input type="text" name="especialidad" placeholder="Ej. Locales Comerciales"
+               value="<?= htmlspecialchars($_POST['especialidad'] ?? '') ?>">
+      </div>
+      <div class="form-group form-full">
+        <label>LinkedIn (URL)</label>
+        <input type="url" name="linkedin" placeholder="https://linkedin.com/in/..."
+               value="<?= htmlspecialchars($_POST['linkedin'] ?? '') ?>">
+      </div>
     </div>
     <div style="margin-top:1.5rem;display:flex;gap:1rem">
       <button type="submit" class="btn btn-primary">💾 Guardar Vendedor</button>

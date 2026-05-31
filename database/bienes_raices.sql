@@ -30,6 +30,11 @@ CREATE TABLE IF NOT EXISTS `vendedores` (
   `apellido`   VARCHAR(100) NOT NULL,
   `email`      VARCHAR(150) NOT NULL UNIQUE,
   `telefono`   VARCHAR(20),
+  `dni`        VARCHAR(20),
+  `especialidad` VARCHAR(100),
+  `linkedin`   VARCHAR(255),
+  `password`   VARCHAR(255),
+  `requiere_cambio_pass` TINYINT(1) DEFAULT 0,
   `foto`       VARCHAR(255) DEFAULT 'default.jpg',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;

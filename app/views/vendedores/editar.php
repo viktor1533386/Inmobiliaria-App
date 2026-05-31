@@ -34,6 +34,21 @@
         <input type="text" name="telefono"
                value="<?= htmlspecialchars($_POST['telefono'] ?? $vendedor->telefono) ?>">
       </div>
+      <div class="form-group">
+        <label>DNI</label>
+        <input type="text" name="dni"
+               value="<?= htmlspecialchars($_POST['dni'] ?? $vendedor->dni) ?>">
+      </div>
+      <div class="form-group">
+        <label>Especialidad</label>
+        <input type="text" name="especialidad"
+               value="<?= htmlspecialchars($_POST['especialidad'] ?? $vendedor->especialidad) ?>">
+      </div>
+      <div class="form-group form-full">
+        <label>LinkedIn (URL)</label>
+        <input type="url" name="linkedin"
+               value="<?= htmlspecialchars($_POST['linkedin'] ?? $vendedor->linkedin) ?>">
+      </div>
     </div>
     <div style="margin-top:1.5rem;display:flex;gap:1rem">
       <button type="submit" class="btn btn-primary">💾 Actualizar</button>

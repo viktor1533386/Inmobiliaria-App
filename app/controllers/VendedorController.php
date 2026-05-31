@@ -16,7 +16,7 @@ class VendedorController extends Controller {
 
     // GET /vendedor
     public function index(): void {
-        Middleware::auth();
+        Middleware::authAdmin();
         $vendedores = $this->vendedor->findAll('nombre ASC');
         $this->render('vendedores/index', [
             'titulo'     => 'Gestión de Vendedores',
@@ -26,15 +26,18 @@ class VendedorController extends Controller {
 
     // GET/POST /vendedor/crear
     public function crear(): void {
-        Middleware::auth();
+        Middleware::authAdmin();
         $errores = [];
 
         if ($this->isPost()) {
             $datos = [
-                'nombre'   => $this->sanitize($_POST['nombre']   ?? ''),
-                'apellido' => $this->sanitize($_POST['apellido'] ?? ''),
-                'email'    => $this->sanitize($_POST['email']    ?? ''),
-                'telefono' => $this->sanitize($_POST['telefono'] ?? ''),
+                'nombre'       => $this->sanitize($_POST['nombre']   ?? ''),
+                'apellido'     => $this->sanitize($_POST['apellido'] ?? ''),
+                'email'        => $this->sanitize($_POST['email']    ?? ''),
+                'telefono'     => $this->sanitize($_POST['telefono'] ?? ''),
+                'dni'          => $this->sanitize($_POST['dni'] ?? ''),
+                'especialidad' => $this->sanitize($_POST['especialidad'] ?? ''),
+                'linkedin'     => $this->sanitize($_POST['linkedin'] ?? ''),
             ];
 
             if (empty($datos['nombre']))   $errores[] = 'El nombre es obligatorio.';
@@ -44,8 +47,17 @@ class VendedorController extends Controller {
             }
 
             if (empty($errores)) {
+                // Generar contraseña aleatoria
+                $randomPass = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$'), 0, 8);
+                $datos['password'] = password_hash($randomPass, PASSWORD_DEFAULT);
+                $datos['requiere_cambio_pass'] = 1;
+
                 $this->vendedor->insert($datos);
-                $this->flash('success', 'Vendedor registrado correctamente.');
+                
+                // Simular envío de correo
+                // mail($datos['email'], 'Tus credenciales de acceso', "Tu contraseña temporal es: $randomPass");
+                
+                $this->flash('success', "Vendedor registrado. Se envió un correo con la clave temporal: $randomPass");
                 $this->redirect('vendedor');
             }
         }
@@ -58,7 +70,7 @@ class VendedorController extends Controller {
 
     // GET/POST /vendedor/editar/{id}
     public function editar(string $id = '0'): void {
-        Middleware::auth();
+        Middleware::authAdmin();
         $vendedor = $this->vendedor->findById((int)$id);
         if (!$vendedor) $this->redirect('vendedor');
 
@@ -66,10 +78,13 @@ class VendedorController extends Controller {
 
         if ($this->isPost()) {
             $datos = [
-                'nombre'   => $this->sanitize($_POST['nombre']   ?? ''),
-                'apellido' => $this->sanitize($_POST['apellido'] ?? ''),
-                'email'    => $this->sanitize($_POST['email']    ?? ''),
-                'telefono' => $this->sanitize($_POST['telefono'] ?? ''),
+                'nombre'       => $this->sanitize($_POST['nombre']   ?? ''),
+                'apellido'     => $this->sanitize($_POST['apellido'] ?? ''),
+                'email'        => $this->sanitize($_POST['email']    ?? ''),
+                'telefono'     => $this->sanitize($_POST['telefono'] ?? ''),
+                'dni'          => $this->sanitize($_POST['dni'] ?? ''),
+                'especialidad' => $this->sanitize($_POST['especialidad'] ?? ''),
+                'linkedin'     => $this->sanitize($_POST['linkedin'] ?? ''),
             ];
 
             if (empty($datos['nombre']))   $errores[] = 'El nombre es obligatorio.';
@@ -94,7 +109,7 @@ class VendedorController extends Controller {
 
     // GET /vendedor/eliminar/{id}
     public function eliminar(string $id = '0'): void {
-        Middleware::auth();
+        Middleware::authAdmin();
         $this->vendedor->delete((int)$id);
         $this->flash('success', 'Vendedor eliminado.');
         $this->redirect('vendedor');

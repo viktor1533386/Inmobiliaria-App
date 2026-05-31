@@ -69,6 +69,7 @@
                value="<?= htmlspecialchars($_POST['direccion'] ?? $propiedad->direccion) ?>">
       </div>
 
+      <?php if (($_SESSION['usuario_rol'] ?? 'admin') === 'admin'): ?>
       <div class="form-group">
         <label>Vendedor responsable</label>
         <select name="vendedor_id">
@@ -81,6 +82,7 @@
           <?php endforeach; ?>
         </select>
       </div>
+      <?php endif; ?>
       <div class="form-group" style="display:flex;flex-direction:row;align-items:center;gap:.75rem;padding-top:1.5rem">
         <input type="checkbox" name="activo" id="activo" value="1"
                <?= (($_POST['activo'] ?? $propiedad->activo) ? 'checked' : '') ?>

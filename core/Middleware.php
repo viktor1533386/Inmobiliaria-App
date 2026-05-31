@@ -18,6 +18,17 @@ class Middleware {
     }
 
     // ----------------------------------------------------------
+    //  Verificar que sea Administrador
+    // ----------------------------------------------------------
+    public static function authAdmin(): void {
+        self::auth();
+        if (($_SESSION['usuario_rol'] ?? '') !== 'admin') {
+            header('Location: ' . BASE_URL . '/admin/dashboard');
+            exit;
+        }
+    }
+
+    // ----------------------------------------------------------
     //  Verificar que el usuario NO esté autenticado.
     //  (Para no mostrar el login a quien ya inició sesión)
     // ----------------------------------------------------------
