@@ -44,6 +44,11 @@ class Database {
         return $this->pdo->lastInsertId();
     }
 
+    // Ejecutar scripts masivos (sin preparar)
+    public function exec(string $sql): int|false {
+        return $this->pdo->exec($sql);
+    }
+
     // Evitar clonación y deserialización del Singleton
     private function __clone() {}
     public function __wakeup() { throw new \Exception("Cannot unserialize Singleton"); }

@@ -47,6 +47,11 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           Vendedores
         </a>
+        <a href="<?= BASE_URL ?>/admin/backup" target="_blank"
+           class="sidebar__nav-link" style="margin-top: 5px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Respaldar BD
+        </a>
       <?php endif; ?>
 
       <?php if ($rolUsuario === 'admin'): ?>
@@ -55,6 +60,11 @@
            class="<?= strpos($titulo ?? '', 'Usuario') !== false ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           Usuarios
+        </a>
+        <a href="<?= BASE_URL ?>/admin/restore"
+           class="<?= strpos($titulo ?? '', 'Restore') !== false ? 'active' : '' ?>" style="margin-top: 5px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+          Restaurar BD
         </a>
       <?php endif; ?>
     </nav>
