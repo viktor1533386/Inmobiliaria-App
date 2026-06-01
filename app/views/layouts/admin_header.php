@@ -21,7 +21,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__brand">
       <div class="sidebar__brand-name">🏠 <span>Hogar Ideal</span> Perú</div>
-      <div class="sidebar__sub"><?= $rolUsuario === 'admin' ? 'Panel TI' : 'Panel Supervisor' ?></div>
+      <div class="sidebar__sub"><?= $rolUsuario === 'admin' ? 'Panel TI' : ($rolUsuario === 'vendedor' ? 'Panel Agente' : 'Panel Supervisor') ?></div>
     </div>
 
     <nav class="sidebar__nav">
@@ -65,7 +65,7 @@
       </div>
       <div>
         <div class="sidebar__user-name"><?= htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Admin') ?></div>
-        <div class="sidebar__user-role"><?= $rolUsuario === 'admin' ? 'Admin (TI)' : 'Supervisor' ?></div>
+        <div class="sidebar__user-role"><?= $rolUsuario === 'admin' ? 'Admin (TI)' : ($rolUsuario === 'vendedor' ? 'Agente Inmobiliario' : 'Supervisor') ?></div>
       </div>
       <a href="<?= BASE_URL ?>/auth/logout" class="sidebar__logout" title="Cerrar sesión">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>

@@ -53,7 +53,7 @@ class PropiedadController extends Controller {
         
         if (($_SESSION['usuario_rol'] ?? '') === 'vendedor') {
             // Un vendedor solo ve sus propiedades
-            $propiedades = $this->propiedad->query("SELECT * FROM propiedades WHERE vendedor_id = ?", [$_SESSION['usuario_id']]);
+            $propiedades = $this->propiedad->findWhere('vendedor_id', $_SESSION['usuario_id']);
         } else {
             $propiedades = $this->propiedad->findAll();
         }
