@@ -37,7 +37,7 @@
           <li><a href="<?= BASE_URL ?>/">Nosotros</a></li>
           <li><a href="<?= BASE_URL ?>/contacto">Contacto</a></li>
           <li><a href="#">Blog Inmobiliario</a></li>
-          <li><a href="#">Trabaja con nosotros</a></li>
+          <li><a href="<?= BASE_URL ?>/auth/login" style="color:var(--text-3)">Intranet</a></li>
         </ul>
       </div>
 

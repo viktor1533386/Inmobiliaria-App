@@ -31,12 +31,12 @@
       </div>
       <div class="form-group form-full">
         <label>Teléfono * <small>(9 dígitos)</small></label>
-        <input type="tel" name="telefono" required maxlength="11"
+        <input type="tel" name="telefono" required maxlength="11" oninput="this.value = this.value.replace(/[^0-9+]/g, '')"
                value="<?= htmlspecialchars($_POST['telefono'] ?? $vendedor->telefono) ?>">
       </div>
       <div class="form-group form-full">
         <label>DNI * <small>(8 dígitos)</small></label>
-        <input type="text" name="dni" required maxlength="8" pattern="\d{8}" title="Debe contener exactamente 8 dígitos"
+        <input type="text" name="dni" required maxlength="8" pattern="\d{8}" title="Debe contener exactamente 8 dígitos" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                value="<?= htmlspecialchars($_POST['dni'] ?? $vendedor->dni) ?>">
       </div>
     </div>

@@ -26,7 +26,7 @@
     <li><a href="<?= BASE_URL ?>/"               class="<?= ($activePage ?? '') === 'home'       ? 'active' : '' ?>">Inicio</a></li>
     <li><a href="<?= BASE_URL ?>/propiedad"       class="<?= ($activePage ?? '') === 'propiedades'? 'active' : '' ?>">Propiedades</a></li>
     <li><a href="<?= BASE_URL ?>/contacto"        class="<?= ($activePage ?? '') === 'contacto'   ? 'active' : '' ?>">Contacto</a></li>
-    <li><a href="<?= BASE_URL ?>/auth/login"      class="navbar__cta">Panel Admin</a></li>
+    <li><a href="<?= BASE_URL ?>/auth/login"      class="navbar__cta">Acceso Agentes</a></li>
   </ul>
 
 
@@ -38,7 +38,7 @@
   <a href="<?= BASE_URL ?>/">Inicio</a>
   <a href="<?= BASE_URL ?>/propiedad">Propiedades</a>
   <a href="<?= BASE_URL ?>/contacto">Contacto</a>
-  <a href="<?= BASE_URL ?>/auth/login">Panel Admin</a>
+  <a href="<?= BASE_URL ?>/auth/login">Acceso Agentes</a>
 </div>
 
 <!-- Flash message -->
