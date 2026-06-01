@@ -12,7 +12,7 @@ class AdminController extends Controller {
 
     // GET /admin/dashboard
     public function dashboard(): void {
-        Middleware::auth();
+        Middleware::requireRole(['admin', 'supervisor', 'vendedor']);
 
         $propiedad = new Propiedad();
         $vendedor  = new Vendedor();

@@ -49,7 +49,7 @@ class PropiedadController extends Controller {
 
     // GET /propiedad/admin  → lista admin
     public function admin(): void {
-        Middleware::auth();
+        Middleware::requireRole(['admin', 'supervisor', 'vendedor']);
         
         if (($_SESSION['usuario_rol'] ?? '') === 'vendedor') {
             // Un vendedor solo ve sus propiedades
@@ -66,7 +66,7 @@ class PropiedadController extends Controller {
 
     // GET/POST /propiedad/crear
     public function crear(): void {
-        Middleware::auth();
+        Middleware::requireRole(['admin', 'supervisor', 'vendedor']);
         $errores = [];
 
         if ($this->isPost()) {
@@ -107,7 +107,7 @@ class PropiedadController extends Controller {
 
     // GET/POST /propiedad/editar/{id}
     public function editar(string $id = '0'): void {
-        Middleware::auth();
+        Middleware::requireRole(['admin', 'supervisor', 'vendedor']);
         $propiedad = $this->propiedad->findById((int)$id);
         if (!$propiedad) $this->redirect('propiedad/admin');
 
@@ -159,7 +159,7 @@ class PropiedadController extends Controller {
 
     // GET /propiedad/eliminar/{id}
     public function eliminar(string $id = '0'): void {
-        Middleware::auth();
+        Middleware::requireRole(['admin', 'supervisor', 'vendedor']);
         $propiedad = $this->propiedad->findById((int)$id);
         
         if ($propiedad) {

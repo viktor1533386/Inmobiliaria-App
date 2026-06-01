@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `nombre`     VARCHAR(100)  NOT NULL,
   `email`      VARCHAR(150)  NOT NULL UNIQUE,
   `password`   VARCHAR(255)  NOT NULL,
+  `rol`        ENUM('admin', 'supervisor', 'vendedor') NOT NULL DEFAULT 'supervisor',
+  `estado`     TINYINT(1) DEFAULT 1,
+  `password_reset_required` TINYINT(1) DEFAULT 1,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -26,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `vendedores` (
   `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `usuario_id` INT UNSIGNED,
   `nombre`     VARCHAR(100) NOT NULL,
   `apellido`   VARCHAR(100) NOT NULL,
   `email`      VARCHAR(150) NOT NULL UNIQUE,
@@ -33,10 +37,9 @@ CREATE TABLE IF NOT EXISTS `vendedores` (
   `dni`        VARCHAR(20),
   `especialidad` VARCHAR(100),
   `linkedin`   VARCHAR(255),
-  `password`   VARCHAR(255),
-  `requiere_cambio_pass` TINYINT(1) DEFAULT 0,
   `foto`       VARCHAR(255) DEFAULT 'default.jpg',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- ──────────────────────────────────────────

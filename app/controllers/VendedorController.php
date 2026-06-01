@@ -6,18 +6,21 @@ require_once APP_ROOT . '/core/Controller.php';
 require_once APP_ROOT . '/core/Middleware.php';
 require_once APP_ROOT . '/core/Mailer.php';
 require_once APP_ROOT . '/app/models/Vendedor.php';
+require_once APP_ROOT . '/app/models/Usuario.php';
 
 class VendedorController extends Controller {
 
     private Vendedor $vendedor;
+    private Usuario $usuario;
 
     public function __construct() {
         $this->vendedor = new Vendedor();
+        $this->usuario = new Usuario();
     }
 
     // GET /vendedor
     public function index(): void {
-        Middleware::authAdmin();
+        Middleware::requireRole(['admin', 'supervisor']);
         $vendedores = $this->vendedor->findAll('nombre ASC');
         $this->render('vendedores/index', [
             'titulo'     => 'Gestión de Vendedores',
@@ -27,7 +30,7 @@ class VendedorController extends Controller {
 
     // GET/POST /vendedor/crear
     public function crear(): void {
-        Middleware::authAdmin();
+        Middleware::requireRole(['admin', 'supervisor']);
         $errores = [];
 
         if ($this->isPost()) {
@@ -50,10 +53,26 @@ class VendedorController extends Controller {
             if (empty($errores)) {
                 // Generar contraseña aleatoria
                 $randomPass = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$'), 0, 8);
-                $datos['password'] = password_hash($randomPass, PASSWORD_DEFAULT);
-                $datos['requiere_cambio_pass'] = 1;
+                
+                // 1. Crear el Usuario de acceso para el vendedor
+                try {
+                    $usuarioId = $this->usuario->insert([
+                        'nombre'   => $datos['nombre'] . ' ' . $datos['apellido'],
+                        'email'    => $datos['email'],
+                        'password' => password_hash($randomPass, PASSWORD_BCRYPT),
+                        'rol'      => 'vendedor',
+                        'estado'   => 1,
+                        'password_reset_required' => 1
+                    ]);
 
-                $this->vendedor->insert($datos);
+                    // 2. Crear el Vendedor vinculándolo al usuario
+                    $datos['usuario_id'] = (int)$usuarioId;
+                    $this->vendedor->insert($datos);
+                } catch (Exception $e) {
+                    $errores[] = 'El correo electrónico ya está en uso por otro usuario.';
+                }
+                
+                if (empty($errores)) {
                 
                 // Enviar correo real usando PHPMailer
                 $asunto = "Bienvenido a Hogar Ideal Perú - Tus Credenciales";
@@ -78,6 +97,7 @@ class VendedorController extends Controller {
                 }
                 
                 $this->redirect('vendedor');
+                }
             }
         }
 
@@ -89,7 +109,7 @@ class VendedorController extends Controller {
 
     // GET/POST /vendedor/editar/{id}
     public function editar(string $id = '0'): void {
-        Middleware::authAdmin();
+        Middleware::requireRole(['admin', 'supervisor']);
         $vendedor = $this->vendedor->findById((int)$id);
         if (!$vendedor) $this->redirect('vendedor');
 
@@ -129,6 +149,10 @@ class VendedorController extends Controller {
     // GET /vendedor/eliminar/{id}
     public function eliminar(string $id = '0'): void {
         Middleware::authAdmin();
+        $vendedor = $this->vendedor->findById((int)$id);
+        if ($vendedor && $vendedor->usuario_id) {
+            $this->usuario->delete((int)$vendedor->usuario_id);
+        }
         $this->vendedor->delete((int)$id);
         $this->flash('success', 'Vendedor eliminado.');
         $this->redirect('vendedor');

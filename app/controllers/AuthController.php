@@ -5,16 +5,13 @@
 require_once APP_ROOT . '/core/Controller.php';
 require_once APP_ROOT . '/core/Middleware.php';
 require_once APP_ROOT . '/app/models/Usuario.php';
-require_once APP_ROOT . '/app/models/Vendedor.php';
 
 class AuthController extends Controller {
 
     private Usuario $usuario;
-    private Vendedor $vendedor;
 
     public function __construct() {
         $this->usuario = new Usuario();
-        $this->vendedor = new Vendedor();
     }
 
     // GET/POST /auth/login
@@ -31,36 +28,31 @@ class AuthController extends Controller {
                 $error = 'Completa todos los campos.';
             } else {
                 $user = $this->usuario->findByEmail($email);
-                
+
                 if ($user && $this->usuario->verifyPassword($password, $user->password)) {
-                    // Login exitoso Administrador
-                    session_regenerate_id(true);
-                    $_SESSION['usuario_id']     = $user->id;
-                    $_SESSION['usuario_nombre'] = $user->nombre;
-                    $_SESSION['usuario_email']  = $user->email;
-                    $_SESSION['usuario_rol']    = 'admin';
-                    $this->redirect('admin/dashboard');
-                } else {
-                    // Intentar buscar como Vendedor
-                    $vend = $this->vendedor->findByEmail($email);
-                    if ($vend && password_verify($password, $vend->password)) {
-                        // Login exitoso Vendedor
-                        session_regenerate_id(true);
-                        $_SESSION['usuario_id']     = $vend->id;
-                        $_SESSION['usuario_nombre'] = $vend->nombre . ' ' . $vend->apellido;
-                        $_SESSION['usuario_email']  = $vend->email;
-                        $_SESSION['usuario_rol']    = 'vendedor';
-                        
-                        if ($vend->requiere_cambio_pass) {
-                            $this->redirect('auth/cambiar_password');
-                        } else {
-                            $this->redirect('admin/dashboard');
-                        }
+                    if ((int)($user->estado ?? 1) !== 1) {
+                        $error = 'Tu cuenta está inactiva. Contacta al administrador.';
                     } else {
-                        // Registrar intento fallido (R6)
-                        Middleware::logFailedLogin($email);
-                        $error = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+                        // Login exitoso
+                        session_regenerate_id(true);
+                        $_SESSION['usuario_id']     = $user->id;
+                        $_SESSION['usuario_nombre'] = $user->nombre;
+                        $_SESSION['usuario_email']  = $user->email;
+                        $_SESSION['usuario_rol']    = $user->rol ?? 'supervisor';
+
+                        if ((int)($user->password_reset_required ?? 0) === 1) {
+                            $this->redirect('auth/cambiar');
+                        }
+
+                        if ($_SESSION['usuario_rol'] === 'admin') {
+                            $this->redirect('usuario');
+                        }
+                        $this->redirect('admin/dashboard');
                     }
+                } else {
+                    // Registrar intento fallido (R6)
+                    Middleware::logFailedLogin($email);
+                    $error = 'Credenciales incorrectas. Verifica tu email y contraseña.';
                 }
             }
         }
@@ -68,43 +60,52 @@ class AuthController extends Controller {
         $this->render('auth/login', ['error' => $error]);
     }
 
-    // GET/POST /auth/cambiar_password
-    public function cambiar_password(): void {
-        Middleware::auth(); // Debe estar logueado
-        if ($_SESSION['usuario_rol'] !== 'vendedor') {
-            $this->redirect('admin/dashboard');
-        }
-
-        $error = '';
-        $success = '';
-
-        if ($this->isPost()) {
-            $pass1 = $_POST['password'] ?? '';
-            $pass2 = $_POST['password_confirm'] ?? '';
-
-            if (empty($pass1) || empty($pass2)) {
-                $error = 'Completa todos los campos.';
-            } elseif ($pass1 !== $pass2) {
-                $error = 'Las contraseñas no coinciden.';
-            } elseif (strlen($pass1) < 6) {
-                $error = 'La contraseña debe tener al menos 6 caracteres.';
-            } else {
-                $hashed = password_hash($pass1, PASSWORD_DEFAULT);
-                $this->vendedor->update($_SESSION['usuario_id'], [
-                    'password' => $hashed,
-                    'requiere_cambio_pass' => 0
-                ]);
-                $this->flash('success', 'Contraseña actualizada correctamente. Bienvenido.');
-                $this->redirect('admin/dashboard');
-            }
-        }
-
-        $this->render('auth/cambiar_password', ['error' => $error, 'success' => $success]);
-    }
-
     // GET /auth/logout
     public function logout(): void {
         session_destroy();
         $this->redirect('auth/login');
+    }
+
+    // GET/POST /auth/cambiar
+    public function cambiar(): void {
+        Middleware::auth();
+
+        $error = '';
+        $exito = '';
+
+        if ($this->isPost()) {
+            $actual   = trim($_POST['actual'] ?? '');
+            $nueva    = trim($_POST['nueva'] ?? '');
+            $confirm  = trim($_POST['confirmar'] ?? '');
+
+            if (!$actual || !$nueva || !$confirm) {
+                $error = 'Completa todos los campos.';
+            } elseif (strlen($nueva) < 6) {
+                $error = 'La nueva contraseña debe tener al menos 6 caracteres.';
+            } elseif ($nueva !== $confirm) {
+                $error = 'La confirmación no coincide.';
+            } else {
+                $user = $this->usuario->findById((int)($_SESSION['usuario_id'] ?? 0));
+                if (!$user || !$this->usuario->verifyPassword($actual, $user->password)) {
+                    $error = 'La contraseña actual no es correcta.';
+                } else {
+                    $this->usuario->update((int)$user->id, [
+                        'password' => password_hash($nueva, PASSWORD_BCRYPT),
+                        'password_reset_required' => 0,
+                    ]);
+                    $exito = 'Contraseña actualizada correctamente.';
+
+                    if (($_SESSION['usuario_rol'] ?? '') === 'admin') {
+                        $this->redirect('usuario');
+                    }
+                    $this->redirect('admin/dashboard');
+                }
+            }
+        }
+
+        $this->render('auth/cambiar', [
+            'error' => $error,
+            'exito' => $exito,
+        ]);
     }
 }
