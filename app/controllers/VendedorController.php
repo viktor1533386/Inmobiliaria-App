@@ -38,16 +38,25 @@ class VendedorController extends Controller {
                 'nombre'       => $this->sanitize($_POST['nombre']   ?? ''),
                 'apellido'     => $this->sanitize($_POST['apellido'] ?? ''),
                 'email'        => $this->sanitize($_POST['email']    ?? ''),
-                'telefono'     => $this->sanitize($_POST['telefono'] ?? ''),
-                'dni'          => $this->sanitize($_POST['dni'] ?? ''),
-                'especialidad' => $this->sanitize($_POST['especialidad'] ?? ''),
-                'linkedin'     => $this->sanitize($_POST['linkedin'] ?? ''),
+                'telefono'     => preg_replace('/[^0-9+]/', '', $_POST['telefono'] ?? ''),
+                'dni'          => preg_replace('/[^0-9]/', '', $_POST['dni'] ?? ''),
             ];
 
             if (empty($datos['nombre']))   $errores[] = 'El nombre es obligatorio.';
             if (empty($datos['apellido'])) $errores[] = 'El apellido es obligatorio.';
             if (!filter_var($datos['email'], FILTER_VALIDATE_EMAIL)) {
                 $errores[] = 'El email no es válido.';
+            }
+            if (strlen($datos['dni']) !== 8) {
+                $errores[] = 'El DNI debe tener exactamente 8 dígitos.';
+            }
+            
+            // Auto-formatear teléfono si tiene 9 dígitos sin prefijo
+            $telefonoPuro = preg_replace('/[^0-9]/', '', $datos['telefono']);
+            if (strlen($telefonoPuro) === 9) {
+                $datos['telefono'] = '+51 ' . $telefonoPuro;
+            } elseif (strlen($telefonoPuro) !== 11) { // 11 considerando 51999...
+                $errores[] = 'El teléfono debe tener 9 dígitos.';
             }
 
             if (empty($errores)) {
@@ -120,16 +129,25 @@ class VendedorController extends Controller {
                 'nombre'       => $this->sanitize($_POST['nombre']   ?? ''),
                 'apellido'     => $this->sanitize($_POST['apellido'] ?? ''),
                 'email'        => $this->sanitize($_POST['email']    ?? ''),
-                'telefono'     => $this->sanitize($_POST['telefono'] ?? ''),
-                'dni'          => $this->sanitize($_POST['dni'] ?? ''),
-                'especialidad' => $this->sanitize($_POST['especialidad'] ?? ''),
-                'linkedin'     => $this->sanitize($_POST['linkedin'] ?? ''),
+                'telefono'     => preg_replace('/[^0-9+]/', '', $_POST['telefono'] ?? ''),
+                'dni'          => preg_replace('/[^0-9]/', '', $_POST['dni'] ?? ''),
             ];
 
             if (empty($datos['nombre']))   $errores[] = 'El nombre es obligatorio.';
             if (empty($datos['apellido'])) $errores[] = 'El apellido es obligatorio.';
             if (!filter_var($datos['email'], FILTER_VALIDATE_EMAIL)) {
                 $errores[] = 'El email no es válido.';
+            }
+            if (strlen($datos['dni']) !== 8) {
+                $errores[] = 'El DNI debe tener exactamente 8 dígitos.';
+            }
+
+            // Auto-formatear teléfono si tiene 9 dígitos sin prefijo
+            $telefonoPuro = preg_replace('/[^0-9]/', '', $datos['telefono']);
+            if (strlen($telefonoPuro) === 9) {
+                $datos['telefono'] = '+51 ' . $telefonoPuro;
+            } elseif (strlen($telefonoPuro) !== 11) { // 11 considerando 51999...
+                $errores[] = 'El teléfono debe tener 9 dígitos.';
             }
 
             if (empty($errores)) {
@@ -148,7 +166,7 @@ class VendedorController extends Controller {
 
     // GET /vendedor/eliminar/{id}
     public function eliminar(string $id = '0'): void {
-        Middleware::authAdmin();
+        Middleware::requireRole(['admin', 'supervisor']);
         $vendedor = $this->vendedor->findById((int)$id);
         if ($vendedor && $vendedor->usuario_id) {
             $this->usuario->delete((int)$vendedor->usuario_id);

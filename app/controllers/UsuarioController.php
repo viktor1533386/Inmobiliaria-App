@@ -94,10 +94,14 @@ class UsuarioController extends Controller {
                 $update = [
                     'nombre' => $datos['nombre'],
                     'email'  => $datos['email'],
-                    'rol'    => $datos['rol'],
-                    'estado' => $datos['estado'],
                     'password_reset_required' => $datos['password_reset_required'],
                 ];
+
+                // No permitir auto-degradarse de rol ni auto-desactivarse
+                if ((int)$id !== (int)$_SESSION['usuario_id']) {
+                    $update['rol'] = $datos['rol'];
+                    $update['estado'] = $datos['estado'];
+                }
 
                 if (!empty($datos['password'])) {
                     $update['password'] = password_hash($datos['password'], PASSWORD_BCRYPT);
@@ -123,6 +127,14 @@ class UsuarioController extends Controller {
     // GET /usuario/eliminar/{id}
     public function eliminar(string $id = '0'): void {
         Middleware::requireRole(['admin']);
+        if ((int)$id === (int)$_SESSION['usuario_id']) {
+            $this->flash('error', 'No puedes eliminar tu propia cuenta.');
+            $this->redirect('usuario');
+        }
+        if ((int)$id === 1) {
+            $this->flash('error', 'No se puede eliminar al administrador principal.');
+            $this->redirect('usuario');
+        }
         $this->usuario->delete((int)$id);
         $this->flash('success', 'Usuario eliminado.');
         $this->redirect('usuario');

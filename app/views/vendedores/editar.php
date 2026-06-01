@@ -30,24 +30,14 @@
                value="<?= htmlspecialchars($_POST['email'] ?? $vendedor->email) ?>">
       </div>
       <div class="form-group form-full">
-        <label>Teléfono</label>
-        <input type="text" name="telefono"
+        <label>Teléfono * <small>(9 dígitos)</small></label>
+        <input type="tel" name="telefono" required maxlength="11"
                value="<?= htmlspecialchars($_POST['telefono'] ?? $vendedor->telefono) ?>">
       </div>
-      <div class="form-group">
-        <label>DNI</label>
-        <input type="text" name="dni"
-               value="<?= htmlspecialchars($_POST['dni'] ?? $vendedor->dni) ?>">
-      </div>
-      <div class="form-group">
-        <label>Especialidad</label>
-        <input type="text" name="especialidad"
-               value="<?= htmlspecialchars($_POST['especialidad'] ?? $vendedor->especialidad) ?>">
-      </div>
       <div class="form-group form-full">
-        <label>LinkedIn (URL)</label>
-        <input type="url" name="linkedin"
-               value="<?= htmlspecialchars($_POST['linkedin'] ?? $vendedor->linkedin) ?>">
+        <label>DNI * <small>(8 dígitos)</small></label>
+        <input type="text" name="dni" required maxlength="8" pattern="\d{8}" title="Debe contener exactamente 8 dígitos"
+               value="<?= htmlspecialchars($_POST['dni'] ?? $vendedor->dni) ?>">
       </div>
     </div>
     <div style="margin-top:1.5rem;display:flex;gap:1rem">

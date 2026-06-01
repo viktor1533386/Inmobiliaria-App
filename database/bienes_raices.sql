@@ -35,8 +35,6 @@ CREATE TABLE IF NOT EXISTS `vendedores` (
   `email`      VARCHAR(150) NOT NULL UNIQUE,
   `telefono`   VARCHAR(20),
   `dni`        VARCHAR(20),
-  `especialidad` VARCHAR(100),
-  `linkedin`   VARCHAR(255),
   `foto`       VARCHAR(255) DEFAULT 'default.jpg',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE

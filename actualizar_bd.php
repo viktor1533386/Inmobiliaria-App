@@ -33,7 +33,9 @@ try {
     $sqlVendedores2 = "
         ALTER TABLE `vendedores`
         DROP COLUMN `password`,
-        DROP COLUMN `requiere_cambio_pass`;
+        DROP COLUMN `requiere_cambio_pass`,
+        DROP COLUMN `especialidad`,
+        DROP COLUMN `linkedin`;
     ";
     $sqlVendedores3 = "
         ALTER TABLE `vendedores`
